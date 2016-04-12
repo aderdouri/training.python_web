@@ -4,11 +4,13 @@ import sys
 
 def response_ok(body=b"this is a pretty minimal response", mimetype=b"text/plain"):
     """returns a basic HTTP response"""
+           
     resp = []
     resp.append(b"HTTP/1.1 200 OK")
-    resp.append(b"Content-Type: text/plain")
+    tmp = "Content-Type: {0}".format(mimetype.decode('utf8'))
+    resp.append(tmp.encode('utf8'))
     resp.append(b"")
-    resp.append(b"this is a pretty minimal response")
+    resp.append(body)
     return b"\r\n".join(resp)
 
 
@@ -22,7 +24,7 @@ def response_method_not_allowed():
 
 def response_not_found():
     """returns a 404 Not Found response"""
-    return b""
+    return b"HTTP/1.1 404 Not Found"
 
 
 def parse_request(request):
@@ -35,6 +37,34 @@ def parse_request(request):
 
 def resolve_uri(uri):
     """This method should return appropriate content and a mime type"""
+
+    import os
+    import pathlib
+    import mimetypes
+ 
+    path_file = "webroot{0}{1}".format('/', uri)
+    dirListing = ''
+
+    try:
+        path = pathlib.Path(path_file)
+        path.resolve()
+        suffix = path.suffix;
+    except FileNotFoundError:
+        raise NameError
+    else:
+        if uri is not '/' and not path.is_dir():
+            mimetype = mimetypes.types_map[suffix]
+            body = path.read_bytes()
+            mimetype = mimetype.encode('utf8')
+            return body, mimetype
+        else:
+            for file_path in path.iterdir():
+                fileName = file_path.name
+                dirListing = "{0} {1}".format(dirListing, fileName)
+            mimetype = b"text/plain"
+            dirListing = dirListing.encode('utf8')
+            return dirListing, mimetype
+
     return b"still broken", b"text/plain"
 
 
