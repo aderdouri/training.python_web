@@ -38,6 +38,7 @@ def parse_request(request):
 def resolve_uri(uri):
     """This method should return appropriate content and a mime type"""
 
+    
     import os
     import pathlib
     import mimetypes
